@@ -54,17 +54,26 @@ def add_book():
     return render_template('add_book.html', authors=authors)
 
 @app.route('/')
-@app.route('/')
 def home():
-    """Fetches all books and allows sorting by title or author name."""
+    """
+    Handles the home page with search and sorting functionality.
+    """
+    search_query = request.args.get('search')
     sort_by = request.args.get('sort_by', 'title')
 
-    if sort_by == 'author':
-        books = Book.query.join(Author).order_by(Author.name).all()
-    else:
-        books = Book.query.order_by(Book.title).all()
+    query = Book.query
 
-    return render_template('home.html', books=books)
+    if search_query:
+        query = query.filter(Book.title.contains(search_query))
+
+    if sort_by == 'author':
+        query = query.join(Author).order_by(Author.name)
+    else:
+        query = query.order_by(Book.title)
+
+    books = query.all()
+
+    return render_template('home.html', books=books, search_query=search_query)
 
 if __name__ == '__main__':
     with app.app_context():

@@ -9,21 +9,33 @@
   <body>
     <h1>My Library</h1>
 
-    <div>
+    <form action="/" method="GET">
+      <input type="text" name="search" placeholder="Search for a book title..." value="{{ search_query if search_query else '' }}">
+      <input type="submit" value="Search">
+      {% if search_query %}
+        <a href="/">Clear Search</a>
+      {% endif %}
+    </form>
+
+    <div style="margin-top: 10px;">
       <span>Sort by: </span>
-      <a href="/?sort_by=title">Title</a> |
-      <a href="/?sort_by=author">Author</a>
+      <a href="/?sort_by=title{% if search_query %}&search={{ search_query }}{% endif %}">Title</a> |
+      <a href="/?sort_by=author{% if search_query %}&search={{ search_query }}{% endif %}">Author</a>
     </div>
     <hr>
 
-    {% for book in books %}
-    <div>
-      <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" alt="Cover" style="width:100px;">
-      <h3>{{ book.title }}</h3>
-      <p>Author: {{ book.author.name }}</p>
-    </div>
-    <hr>
-    {% endfor %}
+    {% if books %}
+      {% for book in books %}
+      <div>
+        <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" alt="Cover" style="width:100px;">
+        <h3>{{ book.title }}</h3>
+        <p>Author: {{ book.author.name }}</p>
+      </div>
+      <hr>
+      {% endfor %}
+    {% else %}
+      <p>No books found matching your criteria.</p>
+    {% endif %}
 
   </body>
 </html>
