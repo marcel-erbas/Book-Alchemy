@@ -1,41 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Library Home</title>
-  </head>
-  <body>
-    <h1>My Library</h1>
+    <title>Digital Library</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
 
-    <form action="/" method="GET">
-      <input type="text" name="search" placeholder="Search for a book title..." value="{{ search_query if search_query else '' }}">
-      <input type="submit" value="Search">
-      {% if search_query %}
-        <a href="/">Clear Search</a>
-      {% endif %}
-    </form>
+    <nav class="bg-blue-600 p-4 text-white shadow-lg mb-8">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">📚 My Library</h1>
+            <div class="space-x-4">
+                <a href="/add_author" class="hover:underline">Add Author</a>
+                <a href="/add_book" class="hover:underline">Add Book</a>
+            </div>
+        </div>
+    </nav>
 
-    <div style="margin-top: 10px;">
-      <span>Sort by: </span>
-      <a href="/?sort_by=title{% if search_query %}&search={{ search_query }}{% endif %}">Title</a> |
-      <a href="/?sort_by=author{% if search_query %}&search={{ search_query }}{% endif %}">Author</a>
+    <main class="container mx-auto px-4">
+        <div class="bg-white p-6 rounded-lg shadow-md mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <form action="/" method="GET" class="flex w-full md:w-auto">
+                <input type="text" name="search" placeholder="Search title..."
+                       value="{{ search_query if search_query else '' }}"
+                       class="border rounded-l px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-r hover:bg-blue-700 transition">Search</button>
+            </form>
+
+            <div class="flex items-center space-x-2">
+                <span class="text-sm text-gray-600">Sort by:</span>
+                <a href="/?sort_by=title{% if search_query %}&search={{ search_query }}{% endif %}"
+                   class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm">Title</a>
+                <a href="/?sort_by=author{% if search_query %}&search={{ search_query }}{% endif %}"
+                   class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm">Author</a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+    {% for book in books %}
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden hover:scale-105 transition-transform duration-300 flex flex-col">
+
+        <div class="h-72 bg-gray-200 flex items-center justify-center p-2">
+            <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg"
+                 alt="Cover"
+                 class="max-w-full max-h-full object-contain shadow-sm">
+        </div>
+
+        <div class="p-4 flex-grow text-center">
+            <h3 class="font-bold text-lg mb-1">{{ book.title }}</h3>
+            <p class="text-gray-600 text-sm mb-4 italic">by {{ book.author.name }}</p>
+        </div>
+
+        <div class="p-4 border-t bg-gray-50 flex justify-between items-center">
+            <span class="text-xs text-gray-400">ISBN: {{ book.isbn }}</span>
+            <form action="{{ url_for('delete_book', book_id=book.id) }}" method="POST"
+                  onsubmit="return confirm('Delete this book?');">
+                <button type="submit" class="text-red-500 hover:text-red-700 text-sm font-semibold">Delete</button>
+            </form>
+        </div>
     </div>
-    <hr>
+    {% endfor %}
+</div>
 
-    {% if books %}
-      {% for book in books %}
-      <div>
-        <img src="https://covers.openlibrary.org/b/isbn/{{ book.isbn }}-M.jpg" alt="Cover" style="width:100px;">
-        <h3>{{ book.title }}</h3>
-        <p>Author: {{ book.author.name }}</p>
-      </div>
-      <hr>
-      {% endfor %}
-    {% else %}
-      <p>No books found matching your criteria.</p>
-    {% endif %}
+        {% if not books %}
+        <div class="text-center py-12">
+            <p class="text-xl text-gray-500 italic">No books found matching your criteria.</p>
+        </div>
+        {% endif %}
+    </main>
 
-  </body>
+</body>
 </html>

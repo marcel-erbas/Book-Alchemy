@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 from data_models import db, Author, Book
 
 app = Flask(__name__)
+
+app.secret_key = 'super_secret_key_choose_your_own'
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'data/library.sqlite')}"
@@ -55,9 +56,7 @@ def add_book():
 
 @app.route('/')
 def home():
-    """
-    Handles the home page with search and sorting functionality.
-    """
+    """Handles the home page with search and sorting functionality."""
     search_query = request.args.get('search')
     sort_by = request.args.get('sort_by', 'title')
 
@@ -74,6 +73,27 @@ def home():
     books = query.all()
 
     return render_template('home.html', books=books, search_query=search_query)
+
+
+@app.route('/book/<int:book_id>/delete', methods=['POST'])
+def delete_book(book_id):
+    book = Book.query.get_or_404(book_id)
+    author = book.author
+    author_id = author.id
+
+    db.session.delete(book)
+    db.session.flush()
+
+    other_books = Book.query.filter_by(author_id=author_id).all()
+
+    if not other_books:
+        db.session.delete(author)
+        flash(f"Book and its last author '{author.name}' were deleted.")
+    else:
+        flash(f"Book '{book.title}' was deleted.")
+
+    db.session.commit()
+    return redirect(url_for('home'))
 
 if __name__ == '__main__':
     with app.app_context():
@@ -93,7 +113,7 @@ if __name__ == '__main__':
 
 
 
-""" 
+"""
 with app.app_context():
     db.create_all()
 """
