@@ -1,10 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
 import os
+from flask import Flask, render_template, request, redirect, url_for, flash
 from data_models import db, Author, Book
 
 app = Flask(__name__)
 
-app.secret_key = 'super_secret_key_choose_your_own'
+app.secret_key = '12659416198461626165'
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = f"sqlite:///{os.path.join(basedir, 'data/library.sqlite')}"
